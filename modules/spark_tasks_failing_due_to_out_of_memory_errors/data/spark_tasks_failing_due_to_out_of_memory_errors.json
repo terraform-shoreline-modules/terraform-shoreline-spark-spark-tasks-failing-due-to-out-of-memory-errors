@@ -1,0 +1,190 @@
+{
+  "name": "spark_tasks_failing_due_to_out_of_memory_errors",
+  "description": "This incident type refers to a situation where Spark tasks are failing due to out of memory errors. Spark is a distributed computing system used for big data processing. When the data volume exceeds the allocated memory, the Spark tasks fail, and the system generates an out of memory error. This type of incident can cause data processing delays or even system downtime, which can impact the overall performance of the application.",
+  "params": [
+    {
+      "name": "MEMORY_SIZE_FOR_EACH_SPARK_EXECUTOR",
+      "value": ""
+    },
+    {
+      "name": "URL_OF_SPARK_MASTER",
+      "value": ""
+    },
+    {
+      "name": "NEW_MEMORY_ALLOCATION",
+      "value": ""
+    },
+    {
+      "name": "MEMORY_SIZE_FOR_THE_SPARK_DRIVER",
+      "value": ""
+    },
+    {
+      "name": "SPARK_APP_DIR",
+      "value": ""
+    },
+    {
+      "name": "SPARK_HOME",
+      "value": ""
+    },
+    {
+      "name": "PATH_TO_SPARK_CONFIGURATION_FILE",
+      "value": ""
+    },
+    {
+      "name": "SPARK_APP_LOG_DIR",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Spark tasks failing due to out of memory errors.\nThis incident type refers to a situation where Spark tasks are failing due to out of memory errors. Spark is a distributed computing system used for big data processing. When the data volume exceeds the allocated memory, the Spark tasks fail, and the system generates an out of memory error. This type of incident can cause data processing delays or even system downtime, which can impact the overall performance of the application."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check system memory usage"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `free -m`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the system is running low on memory"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `vmstat -s`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the amount of available memory"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `cat /proc/meminfo`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the amount of memory used by Spark processes"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ps -e -o pid,user,%mem,command | grep \"spark\"`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the logs for out of memory errors"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `grep -i \"out of memory\" /var/log/messages`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the Spark configuration for memory settings"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `cat ${SPARK_HOME}/conf/spark-defaults.conf | grep -E \"spark.executor.memory|spark.driver.memory\"`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the Spark application code for memory-intensive operations"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `grep -r \"cache\" ${SPARK_APP_DIR}`"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the Spark application logs for memory-related errors"
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `grep -i \"out of memory\" ${SPARK_APP_LOG_DIR}/*`"
+    },
+    {
+      "name": "cell_18",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the system logs for memory-related errors"
+    },
+    {
+      "name": "cell_19",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `dmesg | grep -i \"oom\\|out of memory\"`"
+    },
+    {
+      "name": "cell_20",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Insufficient memory allocation for Spark tasks."
+    },
+    {
+      "name": "cell_21",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_spark_configuration_check($MEMORY_SIZE_FOR_EACH_SPARK_EXECUTOR, $URL_OF_SPARK_MASTER, $MEMORY_SIZE_FOR_THE_SPARK_DRIVER, $SPARK_HOME)"
+    },
+    {
+      "name": "cell_22",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Increase the memory allocation for the Spark executor. This can be done by adjusting the "
+    },
+    {
+      "name": "cell_23",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_spark_memory_update($NEW_MEMORY_ALLOCATION, $PATH_TO_SPARK_CONFIGURATION_FILE)"
+    }
+  ]
+}
